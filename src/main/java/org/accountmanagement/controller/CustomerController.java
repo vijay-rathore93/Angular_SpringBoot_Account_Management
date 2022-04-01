@@ -72,5 +72,10 @@ public class CustomerController {
         return new ResponseEntity<>(customerService.getCustomers(), HttpStatus.OK);
     }
 
+    @PostMapping("/update")
+    public ResponseEntity<Customer> updateCustomerInfo(@RequestBody Customer customer){
+        return new ResponseEntity<>(customerService.updateCustomerInfo(customer), HttpStatus.OK);
+    }
+
 
 }

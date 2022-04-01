@@ -6,6 +6,7 @@ import org.accountmanagement.entity.Customer;
 import org.accountmanagement.exception.CustomerException;
 import org.accountmanagement.model.ApiResponse;
 import org.accountmanagement.repo.CustomerRepo;
+import org.accountmanagement.util.Validators;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -21,6 +22,7 @@ public class CustomerService {
 
     // creating record for customer
     public Customer createCustomerInfo(Customer customer) {
+        Validators.inputValidation(customer);
         customer.setActive(true);
         return customerRepo.save(customer);
     }
@@ -29,13 +31,7 @@ public class CustomerService {
     //uploading  customer  image present in system based on customerId
     public void saveImage(MultipartFile file,Integer customerId) throws Exception {
         String fileName = StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename()));
-        if(fileName.contains("..")) {
-                throw  new CustomerException("Filename contains invalid path sequence "
-                        + fileName);
-            }else if(!fileName.split("\\.")[1].equalsIgnoreCase("jpg")){
-            throw  new CustomerException("Filename must be in .jpg extension.. "
-                    + fileName);
-        }
+        Validators.fileValidation(fileName);
         Customer customerFound=  customerRepo.findById(customerId)
                 .orElseThrow(()->new CustomerException("Customer not Found!!."));
         customerFound.setFileName(fileName);
@@ -61,7 +57,6 @@ public class CustomerService {
         customer.setActive(false);
         customerRepo.save(customer);
         return ApiResponse.builder()
-                .statusCode(200)
                 .message("Customer deactivated successfully..")
                 .build();
     }
@@ -76,7 +71,6 @@ public class CustomerService {
         customer.setActive(true);
         customerRepo.save(customer);
         return ApiResponse.builder()
-                .statusCode(200)
                 .message("Customer activated successfully..")
                 .build();
     }
@@ -91,5 +85,16 @@ public class CustomerService {
     //get all customer present in system
     public List<Customer> getCustomers() {
         return customerRepo.findAll();
+    }
+
+    public Customer updateCustomerInfo(Customer input) {
+        Customer  customerFound= this.getImage(input.getCustomerId());
+        customerFound.setAddress1(input.getAddress1());
+        customerFound.setZipExt(input.getZipExt());
+        customerFound.setZipPin(input.getZipPin());
+        customerFound.setState(input.getState());
+        customerFound.setCountry(input.getCountry());
+        Validators.inputValidation(customerFound);
+        return customerRepo.save(customerFound);
     }
 }
