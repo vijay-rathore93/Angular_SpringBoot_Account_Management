@@ -17,6 +17,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.util.List;
 
+@CrossOrigin(origins = "http://localhost:4200")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/customer/")
@@ -52,12 +53,12 @@ public class CustomerController {
                 .body(new ByteArrayResource(customer.getDocumentToBeVerify()));
     }
 
-    @PostMapping("/deactivate")
+    @GetMapping("/deactivate")
     public ResponseEntity<ApiResponse> deactivateCustomer(@RequestHeader("customerId") Integer customerId){
         return new ResponseEntity<>(customerService.deactivateCustomer(customerId), HttpStatus.ACCEPTED);
     }
 
-    @PostMapping("/activate")
+    @GetMapping("/activate")
     public ResponseEntity<ApiResponse> activateCustomer(@RequestHeader("customerId") Integer customerId){
         return new ResponseEntity<>(customerService.activateCustomer(customerId), HttpStatus.ACCEPTED);
     }

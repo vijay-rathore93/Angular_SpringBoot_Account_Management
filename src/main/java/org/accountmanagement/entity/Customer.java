@@ -47,8 +47,11 @@ public class Customer extends Auditable<String> implements Serializable {
     private String  fileContentType;
     private boolean  isActive;
 
-    @OneToMany
-    @JoinColumn(name = "customerId")
+    @OneToMany(fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL)
+    @JoinTable(name = "customer_account",
+            joinColumns = { @JoinColumn(name = "customerId") },
+            inverseJoinColumns = { @JoinColumn(name = "accountId") })
     private Set<Account> accounts;
 
 

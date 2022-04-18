@@ -7,16 +7,16 @@ public class Validators {
 
     public static void inputValidation(Customer customer){
         if(!customer.getCountry().equalsIgnoreCase("US")
-                || customer.getCountry().equalsIgnoreCase("Canada")){
+                && !customer.getCountry().equalsIgnoreCase("Canada")){
             throw new CustomerException("Country can be only US/Canada");
         }
         if(!customer.getDocumentType().equalsIgnoreCase("DL")
-                || customer.getDocumentType().equalsIgnoreCase("Passport")){
+                && !customer.getDocumentType().equalsIgnoreCase("Passport")){
             throw new CustomerException("Document Type can be only DL/Passport");
         }
-        if(!isNumeric(customer.getZipPin().substring(0,6))){
+      /*  if(!isNumeric(customer.getZipPin().substring(0,6))){
             throw new CustomerException("Starting Character in Zip/Pin must be number..");
-        }
+        }*/
     }
 
 

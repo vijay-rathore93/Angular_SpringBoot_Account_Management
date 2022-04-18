@@ -4,6 +4,7 @@ import lombok.Data;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 
 @Data
@@ -13,9 +14,10 @@ public class Account extends Auditable<String> implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
-    @NotEmpty(message = "Account number can not empty..")
-    private Long accountNumber;
+    private Integer accountId;
+    @NotNull(message = "Account number can not empty..")
+    @Column(unique = true)
+    private Integer accountNumber;
     @NotEmpty(message = "Bank Name can not empty..")
     private String bankName;
     @NotEmpty(message = "IFSC Code can not empty..")
@@ -24,4 +26,5 @@ public class Account extends Auditable<String> implements Serializable {
     private String branchCode;
     private String bankAddress;
     private Double totalAmount;
+    private Boolean isActive;
 }
