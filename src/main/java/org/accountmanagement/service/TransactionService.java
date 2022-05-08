@@ -13,6 +13,8 @@ import org.accountmanagement.repo.TransactionRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+
 @Service
 public class TransactionService {
 
@@ -36,9 +38,21 @@ public class TransactionService {
     }
 
     public ApiResponse depositAmount(TransactionMO transactionMO) {
+        Account accountFrom = accountRepo.findByAccountNumber(transactionMO.getFromAccount()).get();
+        if (accountFrom.getTotalAmount() < transactionMO.getAmountTobeDeposit()) {
+            throw new AccountException("Insufficient amount...");
+        }
+        accountFrom.setTotalAmount(accountFrom.getTotalAmount() - transactionMO.getAmountTobeDeposit());
+        accountRepo.save(accountFrom);
         Account accountTo = accountRepo.findByAccountNumber(transactionMO.getToAccount()).get();
         accountTo.setTotalAmount(accountTo.getTotalAmount() + transactionMO.getAmountTobeDeposit());
         accountRepo.save(accountTo);
+
+        transactionRepo.save(  Transaction.builder()
+                .fromAccount(transactionMO.getFromAccount())
+                .toAccount(transactionMO.getToAccount()).amountTobeTransferred(transactionMO.getAmountTobeDeposit()).isActive(true)
+
+                .transactionDate(LocalDate.now()).build());
         return ApiResponse.builder()
                 .message("Amount deposited successfully..")
                 .build();

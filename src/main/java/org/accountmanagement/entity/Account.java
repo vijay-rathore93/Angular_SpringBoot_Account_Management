@@ -18,6 +18,9 @@ public class Account extends Auditable<String> implements Serializable {
     @NotNull(message = "Account number can not empty..")
     @Column(unique = true)
     private Integer accountNumber;
+
+
+    private Integer customerId;
     @NotEmpty(message = "Bank Name can not empty..")
     private String bankName;
     @NotEmpty(message = "IFSC Code can not empty..")
