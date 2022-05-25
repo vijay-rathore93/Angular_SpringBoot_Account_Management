@@ -96,4 +96,11 @@ public class CustomerService {
         Validators.inputValidation(customerFound);
         return customerRepo.save(customerFound);
     }
+    
+    public ApiResponse deleteCustomer(Integer customerId) {
+        customerRepo.deleteById(customerId);
+        return ApiResponse.builder()
+                .message("Customer deleted successfully..")
+                .build();
+    }
 }

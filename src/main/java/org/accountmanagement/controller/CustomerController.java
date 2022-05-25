@@ -77,6 +77,11 @@ public class CustomerController {
     public ResponseEntity<Customer> updateCustomerInfo(@RequestBody Customer customer){
         return new ResponseEntity<>(customerService.updateCustomerInfo(customer), HttpStatus.OK);
     }
+    
+    @DeleteMapping
+    public ResponseEntity<ApiResponse> deleteCustomerInfo(@RequestHeader("customerId") Integer customerId){
+    	return new ResponseEntity<>(customerService.deleteCustomer(customerId), HttpStatus.OK);
+    }
 
 
 }
