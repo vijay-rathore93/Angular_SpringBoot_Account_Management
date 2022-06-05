@@ -54,4 +54,9 @@ public class AccountController {
     public ResponseEntity<Account> getAccount(@RequestHeader("accountId") Integer accountId){
         return new ResponseEntity<>(accountService.getAccount(accountId), HttpStatus.OK);
     }
+
+    @GetMapping("/accountNumber")
+    public ResponseEntity<Account> getAccountNumber(@RequestHeader("accountNumber") Integer accountNumber){
+        return new ResponseEntity<>(accountService.getAccountNumberData(accountNumber), HttpStatus.OK);
+    }
 }

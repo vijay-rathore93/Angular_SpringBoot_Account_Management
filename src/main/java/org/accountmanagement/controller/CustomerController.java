@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.accountmanagement.entity.Customer;
 import org.accountmanagement.model.ApiResponse;
 import org.accountmanagement.service.CustomerService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -19,11 +20,11 @@ import java.util.List;
 
 @CrossOrigin(origins = "http://localhost:4200")
 @RestController
-@RequiredArgsConstructor
 @RequestMapping("/api/v1/customer/")
 public class CustomerController {
 
-    private final CustomerService customerService;
+    @Autowired
+    private  CustomerService customerService;
 
 
     @PostMapping

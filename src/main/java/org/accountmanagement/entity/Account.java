@@ -1,6 +1,9 @@
 package org.accountmanagement.entity;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotEmpty;
@@ -8,8 +11,11 @@ import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 
 @Data
+@Builder
 @Entity
 @Table(name = "account")
+@AllArgsConstructor
+@NoArgsConstructor
 public class Account extends Auditable<String> implements Serializable {
 
     @Id
@@ -19,6 +25,9 @@ public class Account extends Auditable<String> implements Serializable {
     @Column(unique = true)
     private Integer accountNumber;
 
+
+    @Transient
+    private String customerName;
 
     private Integer customerId;
     @NotEmpty(message = "Bank Name can not empty..")

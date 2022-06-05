@@ -37,6 +37,7 @@ public class AccountService {
     			 .filter(a -> a.getAccountId() != accountId )
     			 .collect(Collectors.toSet());
      }
+        account.setCustomerId(customerId);
         account.setIsActive(true);
         accounts.add(account);
         customer.setAccounts(accounts);
@@ -85,7 +86,16 @@ public class AccountService {
     }
     
     public List<Account> getAccounts() {
-        return accountRepo.findAll();
+        List<Account> accounts= accountRepo.findAll();
+
+        accounts=accounts.stream().map(obj->{
+            Customer customer=customerRepo.findById(obj.getCustomerId())
+                    .orElseThrow(()->new AccountException("Customer not found"));
+            obj.setCustomerName(customer.getFirstName()+" "+customer.getLastName());
+            return obj;
+        }).collect(Collectors.toList());
+
+        return accounts;
     }
     
     public ApiResponse deleteAccount(Integer accountId) {
@@ -100,5 +110,12 @@ public class AccountService {
                  .findById(accountId)
                  .orElseThrow(
                          () -> new CustomerException("File not found with Id: " + accountId));
+    }
+
+    public Account getAccountNumberData(Integer accountNumber) {
+        return accountRepo
+                .findByAccountNumber(accountNumber)
+                .orElseThrow(
+                        () -> new CustomerException("File not found with Id: " + accountNumber));
     }
 }

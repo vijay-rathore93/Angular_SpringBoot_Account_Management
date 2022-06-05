@@ -6,6 +6,7 @@ import org.accountmanagement.exception.CustomerException;
 import org.accountmanagement.model.ApiResponse;
 import org.accountmanagement.repo.CustomerRepo;
 import org.accountmanagement.util.Validators;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -14,10 +15,11 @@ import java.util.List;
 import java.util.Objects;
 
 @Service
-@RequiredArgsConstructor
+
 public class CustomerService {
 
-    private final CustomerRepo customerRepo;
+    @Autowired
+    private  CustomerRepo customerRepo;
 
     // creating record for customer
     public Customer createCustomerInfo(Customer customer) {

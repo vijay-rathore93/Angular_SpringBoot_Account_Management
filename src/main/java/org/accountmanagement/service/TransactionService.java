@@ -11,9 +11,12 @@ import org.accountmanagement.model.TransactionMO;
 import org.accountmanagement.repo.AccountRepo;
 import org.accountmanagement.repo.TransactionRepo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.Date;
+import java.util.List;
 
 @Service
 public class TransactionService {
@@ -30,7 +33,8 @@ public class TransactionService {
                 .findById(txId)
                 .orElseThrow(
                         () -> new CustomerException("Transaction not found with Id: " + txId));
-        transaction.setIsActive(false);
+        transaction.setType("VOID");
+        transaction.setStatus("Cancelled");
         transactionRepo.save(transaction);
         return ApiResponse.builder()
                 .message("Transaction cancelled successfully..")
@@ -38,23 +42,39 @@ public class TransactionService {
     }
 
     public ApiResponse depositAmount(TransactionMO transactionMO) {
+        Transaction transaction = Transaction.builder()
+                .fromAccount(transactionMO.getFromAccount())
+                //.toAccount(transactionMO.getToAccount())
+                .transactionDate(LocalDate.now())
+                .amountTobeTransferred(transactionMO.getAmountTobeDeposit())
+                .type("DEPOSIT")
+                .status("In-Progress")
+                .build();
+
+        transactionRepo.save(transaction);
+        return ApiResponse.builder()
+                .message("Amount Deposit is in Progress, It takes 2-3 minutes ..")
+                .build();
+    }
+
+    public ApiResponse withdrawAmount(TransactionMO transactionMO) {
+
         Account accountFrom = accountRepo.findByAccountNumber(transactionMO.getFromAccount()).get();
-        if (accountFrom.getTotalAmount() < transactionMO.getAmountTobeDeposit()) {
+        if (accountFrom.getTotalAmount() < transactionMO.getAmountToBeWithDraw()) {
             throw new AccountException("Insufficient amount...");
         }
-        accountFrom.setTotalAmount(accountFrom.getTotalAmount() - transactionMO.getAmountTobeDeposit());
-        accountRepo.save(accountFrom);
-        Account accountTo = accountRepo.findByAccountNumber(transactionMO.getToAccount()).get();
-        accountTo.setTotalAmount(accountTo.getTotalAmount() + transactionMO.getAmountTobeDeposit());
-        accountRepo.save(accountTo);
-
-        transactionRepo.save(  Transaction.builder()
+        Transaction transaction = Transaction.builder()
                 .fromAccount(transactionMO.getFromAccount())
-                .toAccount(transactionMO.getToAccount()).amountTobeTransferred(transactionMO.getAmountTobeDeposit()).isActive(true)
+                //.toAccount(transactionMO.getToAccount())
+                .transactionDate(LocalDate.now())
+                .amountTobeTransferred(transactionMO.getAmountToBeWithDraw())
+                .type("WITHDRAW")
+                .status("In-Progress")
+                .build();
 
-                .transactionDate(LocalDate.now()).build());
+        transactionRepo.save(transaction);
         return ApiResponse.builder()
-                .message("Amount deposited successfully..")
+                .message("Amount Deposit is in Progress, It takes 2-3 minutes ..")
                 .build();
     }
 
@@ -63,13 +83,58 @@ public class TransactionService {
         if (accountFrom.getTotalAmount() < transactionMO.getAmountTobeDeposit()) {
             throw new AccountException("Insufficient amount...");
         }
-        accountFrom.setTotalAmount(accountFrom.getTotalAmount() - transactionMO.getAmountTobeDeposit());
-        accountRepo.save(accountFrom);
-        Account accountTo = accountRepo.findByAccountNumber(transactionMO.getToAccount()).get();
-        accountTo.setTotalAmount(accountFrom.getTotalAmount() + transactionMO.getAmountTobeDeposit());
-        accountRepo.save(accountTo);
-        return ApiResponse.builder()
-                .message("Amount Withdraw successfully..")
+        Transaction transaction = Transaction.builder()
+                .fromAccount(transactionMO.getFromAccount())
+                .toAccount(transactionMO.getToAccount())
+                .transactionDate(LocalDate.now())
+                .amountTobeTransferred(transactionMO.getAmountToBeWithDraw())
+                .status("In-Progress")
                 .build();
+
+        transactionRepo.save(transaction);
+        return ApiResponse.builder()
+                .message("Amount Withdraw is in Progress, It takes 2-3 minutes ..")
+                .build();
+    }
+
+    public List<Transaction> getAllTransaction() {
+        return transactionRepo.findAll();
+    }
+
+    @Scheduled(initialDelay = 10000, fixedRate = 20000)
+    public void process() {
+        Boolean accountFlag = false;
+        Boolean transactionFlag = false;
+        List<Transaction> transactions = transactionRepo.findAll();
+        for (Transaction obj : transactions) {
+            Account account = accountRepo.findByAccountNumber(obj.getFromAccount()).get();
+            if (obj.getStatus().equalsIgnoreCase("In-Progress")
+                    && obj.getType().equalsIgnoreCase("DEPOSIT")) {
+                account.setTotalAmount(account.getTotalAmount() + obj.getAmountTobeTransferred());
+                obj.setStatus("COMPLETED");
+                accountFlag = true;
+                transactionFlag = true;
+            } else if (obj.getStatus().equalsIgnoreCase("In-Progress")
+                    && obj.getType().equalsIgnoreCase("WITHDRAW")) {
+                if (account.getTotalAmount() > obj.getAmountTobeTransferred()) {
+                    account.setTotalAmount(account.getTotalAmount() - obj.getAmountTobeTransferred());
+                    obj.setStatus("COMPLETED");
+                } else {
+                    obj.setStatus("DECLINED");
+                }
+                accountFlag = true;
+                transactionFlag = true;
+            }
+
+            if (transactionFlag) {
+                transactionRepo.saveAll(transactions);
+            }
+
+            if (accountFlag) {
+                accountRepo.save(account);
+            }
+        }
+
+
     }
 }

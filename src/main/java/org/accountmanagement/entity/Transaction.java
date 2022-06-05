@@ -30,7 +30,9 @@ public class Transaction extends Auditable<String> implements Serializable {
 
     private Integer toAccount;
 
-    private Boolean isActive;
+    private String type;
 
     private LocalDate transactionDate;
+
+    private String status;
 }
